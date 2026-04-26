@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InternOS — Abdullah · Project 4</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode:"class",
+  theme:{
+    extend:{
+      colors:{
+        "primary":"#74593f","on-primary":"#ffffff","primary-container":"#ffdab9",
+        "on-primary-container":"#795e44","primary-fixed":"#ffdcbe","primary-fixed-dim":"#e3c0a0",
+        "secondary":"#586062","on-secondary":"#ffffff","secondary-container":"#dae1e3",
+        "secondary-fixed-dim":"#c1c8ca","on-secondary-fixed":"#161d1f",
+        "tertiary":"#7a573e","on-tertiary":"#ffffff","tertiary-container":"#ffd9c1",
+        "on-tertiary-container":"#805b42","tertiary-fixed-dim":"#ecbd9e",
+        "surface":"#faf9f6","on-surface":"#1a1c1a","surface-variant":"#e3e2e0",
+        "on-surface-variant":"#4f453d","surface-container":"#efeeeb",
+        "surface-container-low":"#f4f3f1","surface-container-high":"#e9e8e5",
+        "surface-container-highest":"#e3e2e0","surface-container-lowest":"#ffffff",
+        "outline":"#80756c","outline-variant":"#d2c4b9",
+        "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a",
+        "background":"#faf9f6","on-background":"#1a1c1a",
+        "inverse-surface":"#2f312f","inverse-on-surface":"#f2f1ee",
+        "surface-tint":"#74593f","on-secondary-container":"#5d6466",
+        "on-secondary-fixed-variant":"#41484a"
+      },
+      fontFamily:{
+        "body-lg":["Manrope"],"body-md":["Manrope"],
+        "headline-lg":["Noto Serif"],"headline-md":["Noto Serif"],"headline-xl":["Noto Serif"],
+        "label-sm":["Manrope"],"mono":["IBM Plex Mono"]
+      },
+      fontSize:{
+        "body-lg":["18px",{lineHeight:"1.6",fontWeight:"400"}],
+        "body-md":["16px",{lineHeight:"1.6",fontWeight:"400"}],
+        "headline-lg":["32px",{lineHeight:"1.3",fontWeight:"600"}],
+        "headline-md":["24px",{lineHeight:"1.4",fontWeight:"600"}],
+        "headline-xl":["48px",{lineHeight:"1.2",fontWeight:"700"}],
+        "label-sm":["13px",{lineHeight:"1",letterSpacing:"0.05em",fontWeight:"600"}]
+      },
+      borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"}
+    }
+  }
+}
+</script>
+
+<style>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+}
+
+:root {
+  --mocha:       #74593f;
+  --mocha-light: #A5856E;
+  --mocha-pale:  #ffdab9;
+  --blue:        #A0D4E0;
+  --blue-dark:   #6db8ca;
+  --parchment:   #f4f3f1;
+  --success:     #5a9e7a;
+  --error-c:     #ba1a1a;
+  --warn:        #c49a3c;
+  --glass-bg:    rgba(255,255,255,0.45);
+  --glass-border:rgba(255,218,185,0.35);
+  --glass-blur:  16px;
+}
+
+body { overflow-x: hidden; }
+
+/* ===== GOOEY BLOBS ===== */
+.blob-wrap {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(72px); opacity: 0.28;
+}
+.b1 { width:520px; height:520px; background:#ffdab9; top:-120px; left:-100px; animation: driftA 18s ease-in-out infinite; }
+.b2 { width:380px; height:380px; background:#A0D4E0; top:30%; right:-80px; animation: driftB 22s ease-in-out infinite; }
+.b3 { width:300px; height:300px; background:#e3c0a0; bottom:5%; left:20%; animation: driftC 16s ease-in-out infinite; }
+.b4 { width:220px; height:220px; background:#dae1e3; top:55%; left:45%; animation: driftA 24s 4s ease-in-out infinite; }
+
+@keyframes driftA { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.06)} 66%{transform:translate(-20px,40px) scale(0.95)} }
+@keyframes driftB { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-50px,25px) scale(1.08)} 70%{transform:translate(30px,-40px) scale(0.92)} }
+@keyframes driftC { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-35px,-45px) scale(1.05)} }
+
+/* ===== GLASS ===== */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin    { to{transform:rotate(360deg)} }
+@keyframes pulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+@keyframes slideIn { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+/* ===== NAVBAR ===== */
+#site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 64px;
+  background: rgba(255,249,245,0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(210,196,185,0.5);
+  transition: box-shadow .25s;
+}
+#site-header.scrolled { box-shadow: 0 4px 28px -4px rgba(116,89,63,0.13); }
+
+/* Nav links */
+.nav-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px;
+  font-family: 'Noto Serif', serif; font-size: 0.88rem; font-weight: 600;
+  color: #80756c; cursor: pointer;
+  transition: all .18s;
+  border: 1px solid transparent;
+}
+.nav-link:hover { color: var(--mocha); background: rgba(255,218,185,0.2); border-color: rgba(255,218,185,0.5); }
+.nav-link.active { color: var(--mocha); background: rgba(255,218,185,0.3); border-color: rgba(255,218,185,0.6); }
+.nav-link .material-symbols-outlined { font-size: 18px; }
+
+/* ===== STAT CARDS ===== */
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 1.1rem 1.4rem;
+  position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+  cursor: default;
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0;
+  width:3px; height:100%; background: var(--mocha-light);
+  border-radius: 3px 0 0 3px;
+}
+.stat-card.s-blue::before  { background: var(--blue-dark); }
+.stat-card.s-green::before { background: var(--success); }
+.stat-card.s-warn::before  { background: var(--warn); }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px -8px rgba(116,89,63,0.18); }
+
+/* ===== INTERN CARDS ===== */
+.intern-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: all .25s;
+  animation: fadeUp .4s ease both;
+}
+.intern-card:hover {
+  border-color: rgba(116,89,63,0.3);
+  box-shadow: 0 8px 32px -8px rgba(116,89,63,0.14);
+  transform: translateY(-2px);
+}
+
+/* ===== FORM PANEL ===== */
+.form-glass {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,218,185,0.4);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px -8px rgba(116,89,63,0.12);
+}
+
+/* ===== INPUTS ===== */
+.form-input, .form-select {
+  width: 100%;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(116,89,63,0.2);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: #1a1c1a;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  appearance: none;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--mocha);
+  box-shadow: 0 0 0 3px rgba(116,89,63,0.1);
+}
+.form-input::placeholder { color: #80756c; }
+
+/* ===== BADGES ===== */
+.badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-family:'IBM Plex Mono',monospace; font-size:0.6rem; white-space:nowrap; }
+.b-dot { width:5px; height:5px; border-radius:50%; }
+.ba { background:rgba(90,158,122,0.12); color:#3a8060; }
+.ba .b-dot { background:var(--success); animation:pulse 2s infinite; }
+.bc { background:rgba(116,89,63,0.1);   color:#7a5e4d; }
+.bc .b-dot { background:var(--mocha-light); }
+.bh { background:rgba(196,154,60,0.12); color:#a07a1a; }
+.bh .b-dot { background:var(--warn); }
+
+/* ===== AVATAR ===== */
+.mini-av {
+  width:42px; height:42px; border-radius:12px; flex-shrink:0;
+  display:grid; place-items:center;
+  font-family:'Noto Serif',serif; font-weight:700; font-size:0.9rem; color:#fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+
+/* ===== STACK TAG ===== */
+.stack-tag {
+  font-family:'IBM Plex Mono',monospace; font-size:0.62rem;
+  color:var(--blue-dark); background:rgba(160,212,224,0.18);
+  padding:2px 9px; border-radius:4px;
+  border: 1px solid rgba(109,184,202,0.25);
+}
+
+/* ===== ACTION BUTTONS ===== */
+.act-btn {
+  background: rgba(255,255,255,0.6); border: 1px solid rgba(116,89,63,0.18);
+  color: #80756c; border-radius: 6px;
+  padding: 5px 12px; font-family:'IBM Plex Mono',monospace; font-size:0.62rem;
+  cursor:pointer; transition:all .18s; backdrop-filter: blur(6px);
+}
+.act-btn:hover       { color:var(--mocha); border-color:var(--mocha); background:rgba(255,218,185,0.2); }
+.act-btn.del:hover   { color:var(--error-c); border-color:var(--error-c); background:rgba(186,26,26,0.06); }
+
+/* ===== PRIMARY BUTTON ===== */
+.btn-primary {
+  width:100%; padding:13px;
+  background: linear-gradient(135deg, var(--mocha), var(--mocha-light));
+  border:none; border-radius:8px;
+  color:#fff; font-family:'Noto Serif',serif; font-size:1rem; font-weight:600;
+  cursor:pointer; transition:all .2s;
+  box-shadow: 0 4px 16px rgba(116,89,63,0.25);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(116,89,63,0.3); }
+.btn-primary:active { transform:scale(0.98); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+/* ===== TOASTS ===== */
+.toast-wrap { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
+.toast {
+  padding:12px 18px; border-radius:8px;
+  font-family:'IBM Plex Mono',monospace; font-size:0.74rem;
+  display:flex; align-items:center; gap:10px;
+  animation:slideIn .3s ease; backdrop-filter:blur(12px);
+  border:1px solid; min-width:230px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+.t-ok  { background:rgba(90,158,122,0.12); border-color:rgba(90,158,122,0.3); color:#3a8060; }
+.t-err { background:rgba(186,26,26,0.1); border-color:rgba(186,26,26,0.28); color:var(--error-c); }
+.t-inf { background:rgba(116,89,63,0.1); border-color:rgba(116,89,63,0.25); color:var(--mocha); }
+
+/* ===== SPINNER ===== */
+.spinner { display:inline-block; width:22px; height:22px; border:2px solid rgba(116,89,63,0.18); border-top-color:var(--mocha); border-radius:50%; animation:spin .7s linear infinite; }
+
+/* ===== API PILL ===== */
+.api-pill {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,0.55); backdrop-filter:blur(8px);
+  border:1px solid rgba(210,196,185,0.5); border-radius:99px;
+  padding:6px 16px; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:#80756c;
+}
+.api-dot { width:7px; height:7px; border-radius:50%; background:var(--error-c); transition:background .4s; }
+.api-dot.live { background:var(--success); box-shadow:0 0 0 3px rgba(90,158,122,0.2); animation:pulse 2s ease-in-out infinite; }
+
+/* ===== SCROLL REVEAL ===== */
+.reveal { opacity:0; transform:translateY(22px); transition:opacity .6s ease,transform .6s ease; }
+.reveal.v { opacity:1; transform:translateY(0); }
+
+/* ===== LIFECYCLE ===== */
+.lc-step {
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:6px; padding:0 8px; flex:1; min-width:90px;
+  opacity:0; transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s ease;
+}
+.lc-step.in { opacity:1; transform:translateY(0); }
+.lc-icon-wrap {
+  width:48px; height:48px; border-radius:12px; font-size:1.3rem;
+  display:grid; place-items:center;
+  background:rgba(255,255,255,0.6); backdrop-filter:blur(8px);
+  border:1px solid rgba(255,218,185,0.4);
+}
+
+/* ===== SEARCH ===== */
+.search-glass {
+  background:rgba(255,255,255,0.55); backdrop-filter:blur(8px);
+  border:1px solid rgba(210,196,185,0.4); border-radius:8px;
+  padding:8px 13px; font-family:'IBM Plex Mono',monospace; font-size:0.72rem;
+  color:#1a1c1a; outline:none; transition:border-color .2s; width:100%;
+}
+.search-glass::placeholder { color:#80756c; }
+.search-glass:focus { border-color:var(--mocha); }
+
+/* ===== SECTION VISIBILITY ===== */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(116,89,63,0.3); border-radius:3px; }
+</style>
+</head>
+
+<body class="bg-background text-on-background font-body-md text-body-md antialiased">
+
+<!-- ===== BLOBS ===== -->
+<div class="blob-wrap" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+
+<!-- ===== NAVBAR ===== -->
+<header id="site-header">
+  <div class="flex items-center justify-between h-full px-8 gap-6">
+
+    <!-- Logo -->
+    <span class="text-xl font-bold text-primary tracking-tight flex-shrink-0" style="font-family:'Noto Serif',serif">InternOS</span>
+
+    <!-- Nav Links (center) -->
+    <nav class="flex items-center gap-1">
+      <button class="nav-link active" id="nav-interns" onclick="switchSection('interns')">
+        <span class="material-symbols-outlined">group</span> Interns
+      </button>
+      <button class="nav-link" id="nav-lifecycle" onclick="switchSection('lifecycle')">
+        <span class="material-symbols-outlined">speed</span> Lifecycle
+      </button>
+    </nav>
+
+    <!-- Right: search + api status + add button -->
+    <div class="flex items-center gap-4 flex-shrink-0">
+      <!-- Search -->
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+        <input class="search-glass pl-9" style="width:220px;" type="text" id="srch" placeholder="Search interns…" oninput="filterList()"/>
+      </div>
+
+      <!-- API Status -->
+      <div class="api-pill">
+        <div class="api-dot" id="api-dot"></div>
+        <span id="api-txt">Connecting…</span>
+      </div>
+
+      <!-- Add Intern -->
+      <button class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-5 py-2.5 rounded-lg hover:shadow-md transition-all duration-300"
+              onclick="switchSection('interns'); setTimeout(()=>document.getElementById('fn').focus(),100)">
+        + Add Intern
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="pt-20 min-h-screen relative z-10">
+  <div class="max-w-6xl mx-auto px-8 py-8">
+
+    <!-- ── HERO ── -->
+    <div class="mb-8 flex justify-between items-end reveal">
+      <div>
+        <div class="inline-flex items-center gap-2 mb-3 text-[11px] tracking-widest uppercase text-primary border border-primary-container rounded-full px-3 py-1" style="font-family:'IBM Plex Mono',monospace; background:rgba(255,218,185,0.2); backdrop-filter:blur(8px);">
+          ◆ Abdullah &nbsp;·&nbsp; BS Computer Science
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-background mb-1" style="font-family:'Noto Serif',serif;">
+          Built by <em style="color:#74593f; font-style:italic;">Abdullah.</em> Full Stack.
+        </h1>
+        <p class="text-on-surface-variant text-sm">Active intern registry — wired live to your backend API.</p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="filterList()" class="flex items-center gap-2 text-primary font-label-sm text-label-sm px-4 py-2 rounded-lg transition-colors glass hover:shadow-md">
+          <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+        </button>
+        <button onclick="loadInterns()" class="flex items-center gap-2 text-primary font-label-sm text-label-sm px-4 py-2 rounded-lg transition-colors glass hover:shadow-md">
+          <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STAT CARDS ── -->
+    <div class="grid grid-cols-4 gap-4 mb-8 reveal">
+      <div class="stat-card">
+        <div class="text-3xl font-bold text-primary mb-1" id="s-tot" style="font-family:'Noto Serif',serif">—</div>
+        <div class="text-[10px] uppercase tracking-widest text-outline" style="font-family:'IBM Plex Mono',monospace">Total Interns</div>
+      </div>
+      <div class="stat-card s-green">
+        <div class="text-3xl font-bold mb-1" id="s-act" style="font-family:'Noto Serif',serif; color:var(--success)">—</div>
+        <div class="text-[10px] uppercase tracking-widest text-outline" style="font-family:'IBM Plex Mono',monospace">Active</div>
+      </div>
+      <div class="stat-card s-blue">
+        <div class="text-3xl font-bold mb-1" id="s-done" style="font-family:'Noto Serif',serif; color:var(--blue-dark)">—</div>
+        <div class="text-[10px] uppercase tracking-widest text-outline" style="font-family:'IBM Plex Mono',monospace">Completed</div>
+      </div>
+      <div class="stat-card s-warn">
+        <div class="text-3xl font-bold mb-1" id="s-hold" style="font-family:'Noto Serif',serif; color:var(--warn)">—</div>
+        <div class="text-[10px] uppercase tracking-widest text-outline" style="font-family:'IBM Plex Mono',monospace">On Hold</div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: INTERNS ══════════ -->
+    <div class="section active reveal" id="section-interns">
+      <div class="grid grid-cols-3 gap-6">
+
+        <!-- INTERN LIST (2/3) -->
+        <div class="col-span-2">
+          <div class="glass rounded-2xl overflow-hidden" style="border:1px solid rgba(210,196,185,0.45)">
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between px-6 py-4" style="background:rgba(244,243,241,0.7); border-bottom:1px solid rgba(210,196,185,0.3);">
+              <span class="font-semibold text-on-surface" style="font-family:'Noto Serif',serif">Active Interns</span>
+              <span class="text-[11px] text-outline uppercase tracking-wider" id="tbl-count" style="font-family:'IBM Plex Mono',monospace">Loading…</span>
+            </div>
+            <!-- Filters -->
+            <div class="flex gap-3 px-6 py-3" style="border-bottom:1px solid rgba(210,196,185,0.2)">
+              <select class="search-glass" style="width:auto; min-width:130px;" id="flt-st" onchange="filterList()">
+                <option value="">All Status</option>
+                <option>Active</option><option>Completed</option><option>On Hold</option>
+              </select>
+              <select class="search-glass" style="width:auto; min-width:130px;" id="flt-sk" onchange="filterList()">
+                <option value="">All Stacks</option>
+                <option>Frontend</option><option>Backend</option>
+                <option>Full Stack</option><option>DevOps</option><option>AI/ML</option>
+              </select>
+            </div>
+            <!-- Cards -->
+            <div class="flex flex-col gap-3 p-5" id="intern-list">
+              <div class="text-center py-12 text-outline">
+                <div class="spinner mx-auto mb-3"></div>
+                <p style="font-family:'IBM Plex Mono',monospace; font-size:0.75rem">Fetching from API…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORM (1/3) -->
+        <div class="col-span-1">
+          <div class="form-glass">
+            <div class="flex items-center justify-between px-5 py-4" style="background:rgba(244,243,241,0.7); border-bottom:1px solid rgba(210,196,185,0.3);">
+              <span class="font-semibold text-on-surface" id="form-ttl" style="font-family:'Noto Serif',serif">Add Intern</span>
+              <span class="text-[10px] text-outline uppercase tracking-wider" id="form-ep" style="font-family:'IBM Plex Mono',monospace">POST /api/interns</span>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+              <input type="hidden" id="eid"/>
+
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest text-outline mb-2" style="font-family:'IBM Plex Mono',monospace">Full Name</label>
+                <input class="form-input" id="fn" type="text" placeholder="e.g. Sara Ahmed"/>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest text-outline mb-2" style="font-family:'IBM Plex Mono',monospace">Email Address</label>
+                <input class="form-input" id="fe" type="email" placeholder="sara@example.com"/>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest text-outline mb-2" style="font-family:'IBM Plex Mono',monospace">Role / Department</label>
+                <input class="form-input" id="fr" type="text" placeholder="e.g. Frontend Engineer"/>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest text-outline mb-2" style="font-family:'IBM Plex Mono',monospace">Tech Stack</label>
+                <div class="relative">
+                  <select class="form-select" id="fsk">
+                    <option>Frontend</option><option>Backend</option>
+                    <option selected>Full Stack</option><option>DevOps</option><option>AI/ML</option>
+                  </select>
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" style="font-size:10px">▾</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest text-outline mb-2" style="font-family:'IBM Plex Mono',monospace">Status</label>
+                <div class="relative">
+                  <select class="form-select" id="fst">
+                    <option selected>Active</option><option>Completed</option><option>On Hold</option>
+                  </select>
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" style="font-size:10px">▾</span>
+                </div>
+              </div>
+
+              <button class="btn-primary mt-1" id="sbtn" onclick="submitForm()">+ Add Intern</button>
+              <button class="text-sm text-on-surface-variant py-2 px-4 rounded-lg hover:bg-surface-container transition-colors" id="cbtn" onclick="resetForm()" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; border:1px solid rgba(116,89,63,0.15);">✕ Cancel Edit</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: LIFECYCLE ══════════ -->
+    <div class="section reveal" id="section-lifecycle">
+      <div class="glass rounded-2xl overflow-hidden" style="border:1px solid rgba(210,196,185,0.45)">
+        <div class="flex items-center justify-between px-6 py-4" style="background:rgba(244,243,241,0.7); border-bottom:1px solid rgba(210,196,185,0.3);">
+          <span class="font-semibold text-on-surface" style="font-family:'Noto Serif',serif">Nervous System Lifecycle</span>
+          <span class="text-[11px] text-outline uppercase tracking-wider" style="font-family:'IBM Plex Mono',monospace">8-Step fetch() Flow</span>
+        </div>
+        <div class="flex items-start overflow-x-auto px-6 py-8 gap-0" id="lc-body"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="relative z-10" style="background:rgba(26,28,26,0.92); backdrop-filter:blur(12px);">
+  <div class="max-w-6xl mx-auto px-8 py-6 flex items-center justify-between flex-wrap gap-4" style="border-top:1px solid rgba(255,255,255,0.06)">
+    <span style="font-family:'Noto Serif',serif; color:var(--mocha-light); font-size:1.05rem">InternOS</span>
+    <div class="flex gap-2 flex-wrap">
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">HTML5</span>
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">CSS3</span>
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">Vanilla JS</span>
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">fetch()</span>
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">Express</span>
+      <span class="text-[10px] border border-white/10 rounded px-2 py-0.5 text-white/30" style="font-family:'IBM Plex Mono',monospace">MongoDB</span>
+    </div>
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:rgba(255,255,255,0.3)">© 2026 · Abdullah · BS CS · Project 4</span>
+  </div>
+</footer>
+
+<!-- ===== TOASTS ===== -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ===== JS ===== -->
+<script>
+const API = 'http://localhost:5000/api';
+let allInterns = [];
+
+/* ─── SECTION SWITCHER ─── */
+const switchSection = (name) => {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(`section-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+
+  // trigger lifecycle animation when switching to it
+  if (name === 'lifecycle') {
+    setTimeout(() => {
+      document.querySelectorAll('.lc-step').forEach(el => el.classList.add('in'));
+    }, 100);
+  }
+};
+
+/* ─── AVATAR COLORS ─── */
+const AV_BKGS = [
+  'linear-gradient(135deg,#A5856E,#c9aa96)',
+  'linear-gradient(135deg,#6db8ca,#A0D4E0)',
+  'linear-gradient(135deg,#7a5e4d,#A5856E)',
+  'linear-gradient(135deg,#5a9e7a,#88cba6)',
+  'linear-gradient(135deg,#c49a3c,#e8c97a)',
+];
+const avColor = s => { let h=0; for(let c of s) h=(h*31+c.charCodeAt(0))&0xffffffff; return AV_BKGS[Math.abs(h)%AV_BKGS.length]; };
+const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+/* ─── TOAST ─── */
+const toast = (msg, type='inf', dur=3400) => {
+  const el = document.createElement('div');
+  el.className = `toast t-${type}`;
+  el.innerHTML = `<span>${{ok:'✓',err:'✗',inf:'◆'}[type]}</span>${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), dur);
+};
+
+/* ─── API STATUS ─── */
+const setApi = ok => {
+  document.getElementById('api-dot').className = `api-dot${ok?' live':''}`;
+  document.getElementById('api-txt').textContent = ok ? 'API Live' : 'Offline';
+};
+
+/* ─── STATS ─── */
+const updateStats = d => {
+  allInterns = d;
+  document.getElementById('s-tot').textContent  = d.length;
+  document.getElementById('s-act').textContent  = d.filter(i=>i.status==='Active').length;
+  document.getElementById('s-done').textContent = d.filter(i=>i.status==='Completed').length;
+  document.getElementById('s-hold').textContent = d.filter(i=>i.status==='On Hold').length;
+};
+
+/* ─── BADGE ─── */
+const badge = st => {
+  const m = {Active:['ba'],Completed:['bc'],'On Hold':['bh']};
+  const [cls] = m[st]||['bc'];
+  return `<span class="badge ${cls}"><span class="b-dot"></span>${st}</span>`;
+};
+
+/* ─── RENDER INTERNS ─── */
+const renderInterns = interns => {
+  const list = document.getElementById('intern-list');
+  document.getElementById('tbl-count').textContent = `${interns.length} record${interns.length!==1?'s':''}`;
+
+  if (!interns.length) {
+    list.innerHTML = `<div class="text-center py-14 text-outline">
+      <div style="font-size:2rem;margin-bottom:.5rem">◎</div>
+      <div style="font-family:'Noto Serif',serif;font-size:1.05rem;color:#5a4e47;margin-bottom:4px">No interns found</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.72rem">Add your first intern using the form →</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = interns.map((intern, idx) => `
+    <div class="intern-card" style="animation-delay:${idx*50}ms">
+      <div class="flex items-center gap-4" style="width:35%">
+        <div class="mini-av" style="background:${avColor(intern.name)}">${initials(intern.name)}</div>
+        <div>
+          <div style="font-weight:600;font-size:.88rem;color:#1a1c1a">${intern.name}</div>
+          <span class="inline-block mt-1 px-3 py-0.5 rounded-full text-[11px] text-on-surface-variant" style="background:rgba(239,238,235,0.8);font-family:'IBM Plex Mono',monospace">${intern.role}</span>
+        </div>
+      </div>
+      <div style="width:18%">
+        <div class="text-[10px] uppercase tracking-wider text-outline mb-1" style="font-family:'IBM Plex Mono',monospace">Stack</div>
+        <span class="stack-tag">${intern.stack || 'Full Stack'}</span>
+      </div>
+      <div style="width:20%" class="flex items-center gap-2">
+        ${badge(intern.status)}
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="act-btn" onclick="startEdit('${intern._id}')">
+          <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle">edit</span> Edit
+        </button>
+        <button class="act-btn del" onclick="delIntern('${intern._id}')">
+          <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle">delete</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+};
+
+/* ─── FILTER ─── */
+const filterList = () => {
+  const q  = document.getElementById('srch').value.toLowerCase();
+  const st = document.getElementById('flt-st').value;
+  const sk = document.getElementById('flt-sk').value;
+  renderInterns(allInterns.filter(i =>
+    (!q  || (i.name+i.role).toLowerCase().includes(q)) &&
+    (!st || i.status === st) &&
+    (!sk || i.stack  === sk)
+  ));
+};
+
+/* ─── LOAD ─── */
+const loadInterns = async () => {
+  document.getElementById('intern-list').innerHTML =
+    `<div class="text-center py-12 text-outline"><div class="spinner mx-auto mb-3"></div>
+     <p style="font-family:'IBM Plex Mono',monospace;font-size:.75rem">Fetching from API…</p></div>`;
+  try {
+    const res  = await fetch(`${API}/interns`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    updateStats(json.data);
+    renderInterns(json.data);
+    setApi(true);
+  } catch(e) {
+    setApi(false);
+    document.getElementById('intern-list').innerHTML = `
+      <div class="text-center py-14 text-outline">
+        <div style="font-size:2rem;margin-bottom:.5rem">⚡</div>
+        <div style="font-family:'Noto Serif',serif;font-size:1.05rem;color:#5a4e47;margin-bottom:6px">Cannot reach API</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.72rem">Start your backend: <strong>node server.js</strong> on port 5000</div>
+      </div>`;
+    toast('Cannot connect to backend', 'err');
+  }
+};
+
+/* ─── SUBMIT ─── */
+const submitForm = async () => {
+  const id     = document.getElementById('eid').value;
+  const name   = document.getElementById('fn').value.trim();
+  const email  = document.getElementById('fe').value.trim();
+  const role   = document.getElementById('fr').value.trim();
+  const stack  = document.getElementById('fsk').value;
+  const status = document.getElementById('fst').value;
+  if (!name||!email||!role) { toast('Fill all required fields','err'); return; }
+  const btn = document.getElementById('sbtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const res = await fetch(id ? `${API}/interns/${id}` : `${API}/interns`, {
+      method:  id ? 'PUT' : 'POST',
+      headers: {'Content-Type':'application/json'},
+      body:    JSON.stringify({name, email, role, stack, status})
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message||`HTTP ${res.status}`); }
+    toast(id ? 'Intern updated successfully' : 'Intern added successfully', 'ok');
+    resetForm(); loadInterns();
+  } catch(e) { toast(e.message, 'err'); }
+  finally {
+    btn.disabled = false;
+    btn.textContent = document.getElementById('eid').value ? '✓ Update Intern' : '+ Add Intern';
+  }
+};
+
+/* ─── EDIT ─── */
+const startEdit = async id => {
+  try {
+    const res  = await fetch(`${API}/interns/${id}`);
+    const json = await res.json(); const i = json.data;
+    document.getElementById('eid').value = i._id;
+    document.getElementById('fn').value  = i.name;
+    document.getElementById('fe').value  = i.email;
+    document.getElementById('fr').value  = i.role;
+    document.getElementById('fsk').value = i.stack  || 'Full Stack';
+    document.getElementById('fst').value = i.status || 'Active';
+    document.getElementById('form-ttl').textContent = 'Edit Intern';
+    document.getElementById('form-ep').textContent  = 'PUT /api/interns/:id';
+    document.getElementById('sbtn').textContent     = '✓ Update Intern';
+    document.getElementById('cbtn').style.display   = 'block';
+    document.querySelector('.form-glass').scrollIntoView({behavior:'smooth'});
+    toast(`Editing ${i.name}`, 'inf');
+  } catch { toast('Failed to load intern data', 'err'); }
+};
+
+/* ─── DELETE ─── */
+const delIntern = async id => {
+  if (!confirm('Remove this intern from the registry?')) return;
+  try {
+    const res = await fetch(`${API}/interns/${id}`, {method:'DELETE'});
+    if (!res.ok) throw new Error();
+    toast('Intern removed', 'inf'); loadInterns();
+  } catch { toast('Could not delete intern', 'err'); }
+};
+
+/* ─── RESET ─── */
+const resetForm = () => {
+  ['eid','fn','fe','fr'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fsk').value = 'Full Stack';
+  document.getElementById('fst').value = 'Active';
+  document.getElementById('form-ttl').textContent = 'Add Intern';
+  document.getElementById('form-ep').textContent  = 'POST /api/interns';
+  document.getElementById('sbtn').textContent     = '+ Add Intern';
+  document.getElementById('cbtn').style.display   = 'none';
+};
+
+/* ─── LIFECYCLE ─── */
+const STEPS = [
+  { icon:'👆', name:'User Click',   desc:'Triggers async fn' },
+  { icon:'🛡',  name:'try{ opens',  desc:'Error shield on' },
+  { icon:'🌉', name:'fetch()',      desc:'CORS preflight' },
+  { icon:'⏸',  name:'await',       desc:'Thread pauses' },
+  { icon:'✅', name:'res.ok',      desc:'Status checked' },
+  { icon:'📦', name:'.json()',      desc:'Text → Object' },
+  { icon:'🖥',  name:'DOM Update',  desc:'UI injected' },
+  { icon:'🧹', name:'finally{}',   desc:'Spinner clears' },
+];
+
+const buildLC = () => {
+  document.getElementById('lc-body').innerHTML = STEPS.map((s,i) => `
+    <div class="lc-step" id="lc${i}" style="transition-delay:${i*65}ms">
+      <div style="width:22px;height:22px;border-radius:50%;background:var(--mocha);color:#fff;display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600">${i+1}</div>
+      <div class="lc-icon-wrap">${s.icon}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:#7a5e4d;font-weight:600;line-height:1.3">${s.name}</div>
+      <div style="font-size:.67rem;color:#80756c;line-height:1.4">${s.desc}</div>
+    </div>
+    ${i<STEPS.length-1?`<div style="padding:0 4px;display:flex;align-items:center;padding-top:54px;flex-shrink:0"><div style="width:20px;height:1px;background:rgba(116,89,63,0.3);position:relative"><span style="position:absolute;right:-5px;top:-5px;font-size:.42rem;color:rgba(116,89,63,0.4)">▶</span></div></div>`:''}
+  `).join('');
+};
+
+/* ─── SCROLL REVEAL ─── */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('v'); ro.unobserve(e.target); }
+  });
+}, {threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+/* ─── STICKY HEADER ─── */
+window.addEventListener('scroll', () =>
+  document.getElementById('site-header').classList.toggle('scrolled', scrollY > 10)
+);
+
+/* ─── HEALTH CHECK ─── */
+const healthCheck = async () => {
+  try {
+    const r = await fetch(`${API}/health`);
+    const j = await r.json();
+    setApi(j.success && j.db === 'Connected');
+  } catch { setApi(false); }
+};
+
+/* ─── INIT ─── */
+buildLC();
+healthCheck();
+loadInterns();
+</script>
+</body>
+</html>
